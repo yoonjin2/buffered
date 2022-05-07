@@ -6,9 +6,6 @@
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
-#define DEVNAME "buf"
-#define DEVEALLOC "buf%d"
-#define SUCCESS 0
 typedef long long ll;
 
 typedef struct node {

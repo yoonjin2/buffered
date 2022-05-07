@@ -8,6 +8,9 @@
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
+#define DEVALLOC "buffer%d"
+#define DEVNAME "buffer"
+
 
 
 int8_t is_busy;
@@ -19,21 +22,20 @@ static struct file_operations fops = {
 	.open			= device_open,
 	.release	=device_release,
 };
-dev_t dev;
-static struct class *class_dev;
-int major;
+static struct class *cdev_class;
 typedef struct cdev cdev;
 static cdev cdev_data_array[MAX];
 extern int __init init_device (void) {
 	
+	dev_t dev;
+  int major=14132;
 	int cnt;
-	alloc_chrdev_region ( &dev ,0 , 1,DEVNAME);
-	major = MAJOR(dev);
-	class_dev = class_create ( THIS_MODULE , DEVNAME);
+	register_chrdev ( major ,DEVNAME , &fops );
+	cdev_class = class_create ( THIS_MODULE , DEVNAME);
 	for ( cnt = 0 ; cnt < MAX; cnt ++) {
-		cdev_init( &cdev_data_array[cnt] , fops);
+		cdev_init( &cdev_data_array[cnt] , &fops);
 		cdev_data_array[cnt].owner = THIS_MODULE;
-		cdev_add(cdev_data_array[cnt].cdev,MAKDEV(major, cnt) , 1 );
+		cdev_add(&cdev_data_array[cnt].cdev,MKDEV(major, cnt) , 1 );
 		device_create ( cdev_class  , NULL , MKDEV(major,cnt),NULL, DEVALLOC,cnt);
 	}
 		
@@ -43,7 +45,7 @@ extern int __init init_device (void) {
 extern void __exit clean_device(void) {
 	int cnt;
 	for (cnt = 0; cnt < MAX ; cnt++ ) {
-		device_destroy(mychardev_class,MKDEV(major,cnt));
+		device_destroy(cdev_class,MKDEV(major,cnt));
 	}
 	class_unregister(cdev_class);
 	class_destroy (cdev_class);
@@ -60,8 +62,6 @@ extern int device_open (struct inode *inode , struct file *file ) {
 	return 0;
 }
 extern int device_release (struct inode *inode , struct file *file) {
-	module_put(THIS_MODULE);
-	is_busy= 0;
 	return 0;
 }
 
