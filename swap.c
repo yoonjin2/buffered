@@ -1,11 +1,10 @@
 #include "list.h"
-#include <string.h>
-void swap ( element_t * a , element_t * b ) {
-	if ( memcmp((void *)a , (void *)b , sizeof(element_t)) == 0 ) {
-		return;
-	}
-	element_t tmp=*a;
-	*a=*b;
-	*b=tmp;
+#include <linux/slab.h>
+#include <linux/string.h>
+void swap_void ( void * a , void * b ) {
+	void * tmp=kmalloc ( sizeof(void *), GFP_KERNEL);
+	memcpy( a , b , sizeof(void *));
+	memcpy( b , tmp , sizeof(void*));
+	kfree(tmp);
 }
 

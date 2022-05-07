@@ -1,6 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "list.h"
+#include <linux/slab.h>
 // function that removes the item
 void * remove_item ( list * lst , node * element )
 {	

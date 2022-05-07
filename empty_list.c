@@ -1,11 +1,11 @@
-#include <stdlib.h>
 #include "list.h"
+#include <linux/slab.h>
 // function that empties list
 void empty_list ( list * lst ) {
+    node * element = lst-> front->next ; // list is first value, that is next of the front node
 		if (lst ->size==0) {
 				return;
 		}
-    node * element = lst-> front->next ; // list is first value, that is next of the front node
     while ( element != lst -> rear ) { // while list is not rear node
         element = element -> next ;   // go to the next node
         kfree ( element ) ;           // free the list

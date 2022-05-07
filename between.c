@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "list.h"
-#include <string.h>
+#include <linux/string.h>
+#include <linux/slab.h>
 // add number between two nodes
 void between( list * lst , void * item , node * b , node * n ) {
     node * element ;
@@ -21,21 +20,21 @@ void between( list * lst , void * item , node * b , node * n ) {
     	lst -> size ++ ;
     }
 }
-void push ( list * lst , element_t item ) {
+void push ( list * lst , void * item ) {
 	between ( lst , item , lst -> rear -> prev , lst -> rear ) ;
 }
 void push_list ( list * lst , list * lst_target ) {
-	auto unsigned ll SIZE = (size(lst_target)+2)*sizeof (node) * sizeof(ll);
-  list * target = kmalloc ( SIZE , GFP_USER );
-	memcpy ( target , lst_target , SIZE );
-	node * push_node = lst -> rear -> prev;	
-	node * target_node = target -> front -> next;
+  list * target = kmalloc ( (size(lst_target)+2)*sizeof (node) * sizeof(ll) , GFP_KERNEL );
+	node * push_node;
+	node * target_node;
+	memcpy ( target , lst_target , (size(lst_target)+2)*sizeof (node) * sizeof(ll) );
+	push_node = lst -> rear -> prev;	
+	target_node = target -> front -> next;
 	push_node -> next = target_node;
 	target_node -> prev = push_node;
 	target_node -> next = lst -> rear;
 	lst -> rear -> prev = target_node;
-	auto unsigned ll lst_new_size_t = lst -> size + target->size;
-	lst -> size = lst_new_size_t ;
+	lst -> size += target->size ;
 	reset_list ( target );
 	free_list  ( target );
 

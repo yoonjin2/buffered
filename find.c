@@ -1,13 +1,11 @@
 #include "list.h"
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <linux/string.h>
 // find node
-node * find ( list * lst, element_t key ) {
+node * find ( list * lst, void * key ) {
 	node * p;
 	p = lst -> front -> next ;
 	while ( p != lst -> rear ) {
-		if ( !memcmp( p , lst -> rear , sizeof(element_t) ) ) {
+		if ( !memcmp( p , lst -> rear , sizeof(void *) ) ) {
 			break;
 		}
 		p = p -> next ;

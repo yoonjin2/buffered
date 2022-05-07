@@ -1,6 +1,4 @@
-#include <stdio.h> 
 #include "list.h"
-#include <stdbool.h>
 
 // return size of list
 ll size ( list * lst ) {
@@ -18,10 +16,10 @@ void repair_size ( list * lst ) {
 // check if list is empty
 bool empty ( list * lst ) {
     if ( lst -> size == 0 ) {
-        return true ;
+        return 1 ;
 	}
 
     else {
-        return false ;
+        return 0 ;
 	}
 }
