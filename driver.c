@@ -19,14 +19,35 @@ static struct file_operations fops = {
 	.open			= device_open,
 	.release	=device_release,
 };
+dev_t dev;
+static struct class *class_dev;
+int major;
+typedef struct cdev cdev;
+static cdev cdev_data_array[MAX];
 extern int __init init_device (void) {
 	
-	major = register_chrdev ( 0 , DEVNAME , &fops );   	
+	int cnt;
+	alloc_chrdev_region ( &dev ,0 , 1,DEVNAME);
+	major = MAJOR(dev);
+	class_dev = class_create ( THIS_MODULE , DEVNAME);
+	for ( cnt = 0 ; cnt < MAX; cnt ++) {
+		cdev_init( &cdev_data_array[cnt] , fops);
+		cdev_data_array[cnt].owner = THIS_MODULE;
+		cdev_add(cdev_data_array[cnt].cdev,MAKDEV(major, cnt) , 1 );
+		device_create ( cdev_class  , NULL , MKDEV(major,cnt),NULL, DEVALLOC,cnt);
+	}
+		
 	printk ("Buffered Device Initialized; Please check /dev");
 	return 0;
 }
 extern void __exit clean_device(void) {
-	unregister_chrdev( major , DEVNAME );
+	int cnt;
+	for (cnt = 0; cnt < MAX ; cnt++ ) {
+		device_destroy(mychardev_class,MKDEV(major,cnt));
+	}
+	class_unregister(cdev_class);
+	class_destroy (cdev_class);
+	unregister_chrdev_region( MKDEV(major,0) , MINORMASK);
 	lst = kmalloc ( sizeof(list) , GFP_KERNEL );
 }
 
