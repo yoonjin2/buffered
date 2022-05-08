@@ -1,9 +1,9 @@
 #!/bin/bash
 module="driver"
+major="14132"
 device="buffer"
-major=$(awk "\\$2= =\"$module\" {print \\$1" /proc/devices)
 
-for i in {1..2..10}
+for i in {0..1..10}
 do
-	mknod /dev/${device}$i c $major $i
+	mknod ${device}$i c $major $i
 done

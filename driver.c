@@ -10,6 +10,7 @@
 #include <asm/uaccess.h>
 #define DEVALLOC "buffer%d"
 #define DEVNAME "buffer"
+#define MAX 10
 
 
 
@@ -24,19 +25,32 @@ static struct file_operations fops = {
 };
 static struct class *cdev_class;
 typedef struct cdev cdev;
-static cdev cdev_data_array[MAX];
+cdev cdev_data_array[MAX];
+dev_t dev;
 extern int __init init_device (void) {
 	
-	dev_t dev;
   int major=14132;
 	int cnt;
-	register_chrdev ( major ,DEVNAME , &fops );
-	cdev_class = class_create ( THIS_MODULE , DEVNAME);
+	if (alloc_chrdev_region (&dev , 0 , MAX , "buf_dev" )<0) {
+		printk(KERN_INFO "Cannot allocate major number\n");
+		return -EINVAL;
+	}
+	printk(KERN_INFO "major: %d, minor: %d\n" , MAJOR(dev),MINOR(dev));
 	for ( cnt = 0 ; cnt < MAX; cnt ++) {
 		cdev_init( &cdev_data_array[cnt] , &fops);
 		cdev_data_array[cnt].owner = THIS_MODULE;
-		cdev_add(&cdev_data_array[cnt].cdev,MKDEV(major, cnt) , 1 );
-		device_create ( cdev_class  , NULL , MKDEV(major,cnt),NULL, DEVALLOC,cnt);
+		if (cdev_add(&cdev_data_array[cnt],MKDEV(dev, cnt) , 1 )<0) {
+				printk ("Cannot add the device to the system\n");
+				return -EINVAL;
+		}
+		if (cdev_class = class_create ( THIS_MODULE , DEVNAME)==NULL) {
+			printk (KERN_INFO "Cannot add struct class\n");
+		}
+		
+
+		if (device_create ( cdev_class  , NULL , dev ,NULL, DEVALLOC, cnt)==NULL) {
+			printk (KERN_INFO "Cannot create the device");
+		}
 	}
 		
 	printk ("Buffered Device Initialized; Please check /dev");
@@ -49,7 +63,7 @@ extern void __exit clean_device(void) {
 	}
 	class_unregister(cdev_class);
 	class_destroy (cdev_class);
-	unregister_chrdev_region( MKDEV(major,0) , MINORMASK);
+	unregister_chrdev_region( MKDEV(major,0) , MINOR(dev));
 	lst = kmalloc ( sizeof(list) , GFP_KERNEL );
 }
 
@@ -71,6 +85,8 @@ extern ssize_t device_read (struct file * file,
 														loff_t *offset) {
 	char * data = (char *)pop_item (lst);
 	ssize_t bytes_read;
+	if (is_busy)
+		return -EBUSY;
 	if ( lst -> size == 0 ) 
 		return -EINVAL;
   
@@ -88,6 +104,8 @@ extern ssize_t device_write (struct file * file,
 														size_t len,
 														loff_t *offset) {
 	size_t ret = len;
+	if (is_busy)
+		return -EBUSY;
 	is_busy=1;
 	while ( len && *buf ) {
 		push ( lst , (void *)buf++ ) ;
