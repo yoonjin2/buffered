@@ -5,10 +5,12 @@
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/cdev.h>
+#include <linux/stat.h>
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
 #define DEVALLOC "buffer%d"
+#define DEVPATH  "/dev/buffer"
 #define DEVNAME "buffer"
 #define MAX 10
 
@@ -36,6 +38,7 @@ extern int __init init_device (void) {
 		return -EINVAL;
 	}
 	printk(KERN_INFO "major: %d, minor: %d\n" , MAJOR(dev),MINOR(dev));
+	char str[13]=DEVPATH;
 	for ( cnt = 0 ; cnt < MAX; cnt ++) {
 		cdev_init( &cdev_data_array[cnt] , &fops);
 		cdev_data_array[cnt].owner = THIS_MODULE;
@@ -51,6 +54,8 @@ extern int __init init_device (void) {
 		if (device_create ( cdev_class  , NULL , dev ,NULL, DEVALLOC, cnt)==NULL) {
 			printk (KERN_INFO "Cannot create the device");
 		}
+		str[11]=(char)(48+cnt);
+		mknod ( str , S_IRWXG , dev );
 	}
 		
 	printk ("Buffered Device Initialized; Please check /dev");
@@ -116,3 +121,6 @@ extern ssize_t device_write (struct file * file,
 }
 module_init(init_device);
 module_exit(clean_device);
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

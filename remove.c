@@ -26,3 +26,6 @@ void * pop_item ( list * lst ) {
 	void * i = remove_item ( lst , lst -> rear -> prev ) ;
 	return i;
 }
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

@@ -8,3 +8,6 @@ void swap_void ( void * a , void * b ) {
 	kfree(tmp);
 }
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

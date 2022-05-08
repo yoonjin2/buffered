@@ -6,3 +6,6 @@ void show( list *lst ) {
 			printk ( "%c" , *(char *)t->key );
     }
 }
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");
