@@ -20,6 +20,7 @@ int8_t is_busy;
 
 list * lst;
 static struct file_operations fops = {
+	.owner		= THIS_MODULE,
 	.read			= device_read,
 	.write		=device_write,
 	.open			= device_open,
