@@ -36,6 +36,14 @@ extern int __init init_device (void) {
 		printk(KERN_INFO "Cannot allocate major number\n");
 		return -EINVAL;
 	}
+
+	if (cdev_class = class_create ( THIS_MODULE , DEVNAME)==NULL) {
+		printk (KERN_INFO "Cannot add struct class\n");
+	}
+	if (device_create ( cdev_class  , NULL , dev ,NULL, DEVALLOC, cnt)==NULL) {
+		printk (KERN_INFO "Cannot create the device");
+	}
+
 	printk(KERN_INFO "major: %d, minor: %d\n" , MAJOR(dev),MINOR(dev));
   int major=MAJOR(dev);
 	char str[13]=DEVPATH;
@@ -46,15 +54,8 @@ extern int __init init_device (void) {
 				printk ("Cannot add the device to the system\n");
 				return -EINVAL;
 		}
-		if (cdev_class = class_create ( THIS_MODULE , DEVNAME)==NULL) {
-			printk (KERN_INFO "Cannot add struct class\n");
-		}
 		
 
-		if (device_create ( cdev_class  , NULL , dev ,NULL, DEVALLOC, cnt)==NULL) {
-			printk (KERN_INFO "Cannot create the device");
-		}
-		str[11]=(char)(48+cnt);
 	}
 		
 	printk ("Buffered Device Initialized; Please check /dev");
