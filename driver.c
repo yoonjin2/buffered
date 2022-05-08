@@ -31,13 +31,13 @@ cdev cdev_data_array[MAX];
 dev_t dev;
 extern int __init init_device (void) {
 	
-  int major=14132;
 	int cnt;
 	if (alloc_chrdev_region (&dev , 0 , MAX , "buf_dev" )<0) {
 		printk(KERN_INFO "Cannot allocate major number\n");
 		return -EINVAL;
 	}
 	printk(KERN_INFO "major: %d, minor: %d\n" , MAJOR(dev),MINOR(dev));
+  int major=MAJOR(dev);
 	char str[13]=DEVPATH;
 	for ( cnt = 0 ; cnt < MAX; cnt ++) {
 		cdev_init( &cdev_data_array[cnt] , &fops);
@@ -55,7 +55,6 @@ extern int __init init_device (void) {
 			printk (KERN_INFO "Cannot create the device");
 		}
 		str[11]=(char)(48+cnt);
-		mknod ( str , S_IRWXG , dev );
 	}
 		
 	printk ("Buffered Device Initialized; Please check /dev");
