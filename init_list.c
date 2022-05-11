@@ -17,3 +17,6 @@ void reset_list ( list * lst ) { // init list
   lst -> rear -> prev = lst -> front ;
   lst -> size = 0 ;
 }
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

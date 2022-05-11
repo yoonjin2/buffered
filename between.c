@@ -39,3 +39,6 @@ void push_list ( list * lst , list * lst_target ) {
 	free_list  ( target );
 
 }
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

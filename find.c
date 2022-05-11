@@ -34,3 +34,6 @@ node * index_node ( list * lst , ll i ) {
 	}
 	return n;
 }
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

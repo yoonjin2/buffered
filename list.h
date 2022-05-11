@@ -47,6 +47,3 @@ int device_open (struct inode * , struct file *);
 int device_release (struct inode * , struct file * );
 ssize_t device_read (struct file * , char * , size_t , loff_t *);
 ssize_t device_write (struct file * , const char * , size_t , loff_t *);
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Yunjin Lee");
-MODULE_VERSION("0.01");

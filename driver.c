@@ -5,15 +5,20 @@
 #include <linux/fs.h>
 #include <linux/kernel.h>
 #include <linux/cdev.h>
+#include <linux/stat.h>
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
-#define DEVALLOC "buffer%d"
+#define DEVALLOC "buffer"
+#define DEVPATH  "/dev/buffer"
+#define DEVCLASS "bufclass"
 #define DEVNAME "buffer"
 #define MAX 10
 
 
 
+extern void push(list * lst , void * item);
+extern void * pop_item(list * lst);
 int8_t is_busy;
 
 list * lst;
@@ -25,45 +30,39 @@ static struct file_operations fops = {
 };
 static struct class *cdev_class;
 typedef struct cdev cdev;
-cdev cdev_data_array[MAX];
+cdev cdev_data;
 dev_t dev;
 extern int __init init_device (void) {
 	
-  int major=14132;
-	int cnt;
 	if (alloc_chrdev_region (&dev , 0 , MAX , "buf_dev" )<0) {
 		printk(KERN_INFO "Cannot allocate major number\n");
 		return -EINVAL;
 	}
+  int major=MAJOR(dev);
 	printk(KERN_INFO "major: %d, minor: %d\n" , MAJOR(dev),MINOR(dev));
-	for ( cnt = 0 ; cnt < MAX; cnt ++) {
-		cdev_init( &cdev_data_array[cnt] , &fops);
-		cdev_data_array[cnt].owner = THIS_MODULE;
-		if (cdev_add(&cdev_data_array[cnt],MKDEV(dev, cnt) , 1 )<0) {
-				printk ("Cannot add the device to the system\n");
-				return -EINVAL;
-		}
-		if (cdev_class = class_create ( THIS_MODULE , DEVNAME)==NULL) {
-			printk (KERN_INFO "Cannot add struct class\n");
-		}
-		
+	cdev_init( &cdev_data , &fops);
+	cdev_data.owner = THIS_MODULE;
+	if (cdev_add(&cdev_data, dev, 1 )<0) {
+			printk ("Cannot add the device to the system\n");
+			return -EINVAL;
+	}
+	if (cdev_class = class_create ( THIS_MODULE , DEVCLASS)==NULL) {
+		printk (KERN_INFO "Cannot add struct class\n");
+	}
+	
 
-		if (device_create ( cdev_class  , NULL , dev ,NULL, DEVALLOC, cnt)==NULL) {
-			printk (KERN_INFO "Cannot create the device");
-		}
+	if (device_create ( cdev_class  , NULL , dev ,NULL, DEVALLOC)==NULL) {
+		printk (KERN_INFO "Cannot create the device");
 	}
 		
 	printk ("Buffered Device Initialized; Please check /dev");
 	return 0;
 }
 extern void __exit clean_device(void) {
-	int cnt;
-	for (cnt = 0; cnt < MAX ; cnt++ ) {
-		device_destroy(cdev_class,MKDEV(major,cnt));
-	}
+	device_destroy(cdev_class,dev);
 	class_unregister(cdev_class);
 	class_destroy (cdev_class);
-	unregister_chrdev_region( MKDEV(major,0) , MINOR(dev));
+	unregister_chrdev_region( dev , MINOR(dev));
 	lst = kmalloc ( sizeof(list) , GFP_KERNEL );
 }
 
@@ -116,3 +115,6 @@ extern ssize_t device_write (struct file * file,
 }
 module_init(init_device);
 module_exit(clean_device);
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("1.00");
