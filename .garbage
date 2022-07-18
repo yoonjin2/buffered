@@ -6,21 +6,23 @@
 #include <linux/kernel.h>
 #include <linux/cdev.h>
 #include <linux/stat.h>
+#include <sys/stat.h>
 #include <linux/errno.h>
 #include <linux/types.h>
-#include <linux/string.h>
 #include <asm/uaccess.h>
 #define DEVALLOC "buffer"
 #define DEVPATH  "/dev/buffer"
 #define DEVCLASS "bufclass"
 #define DEVNAME "buffer"
-#define _MAJOR_ 600
-#define _MINOR_ 100000
+#define MINORS 1
+#define CUSTOM_MODE 0006774
+mode_t driver_mode=CUSTOM_MODE;
 #define GET_UUID(string) do { int16_t raw; strcpy(string,#raw);}
 
 
-extern int8_t enqueue(list * lst , bdat_t * item);
-extern bdat_t * dequeue(list * lst);
+
+extern void enqueue(list * lst , void * item);
+extern void * dequeue(list * lst);
 int8_t is_busy;
 
 list * lst;
@@ -32,52 +34,58 @@ struct file_operations fops = {
 };
 struct class *cdev_class;
 typedef struct cdev cdev;
-char * __tmp_name__;
+cdev cdev_data;
 dev_t dev;
 
+MODULE_AUTHOR("CraftX Inc.");
 MODULE_LICENSE("GPL");
 
 int __init init_device (void) {
 	
-        dev = MKDEV (_MAJOR_,_MINOR_) ;
+        dev = MKDEV ( MAJOR ( dev ) , MINOR ( dev ) ) ;
 	lst = kmalloc ( sizeof(list) , GFP_KERNEL );
-	__tmp_name__ = kmalloc (sizeof(int16_t),SLAB_TEMPORARY);
-	if(__register_chrdev( _MAJOR_,_MINOR_,num,__tmp_name__,&fops)<0 ) {
-		printk(KERN_INFO "Cannot allocate major number");	
-		return -ENOMEM;
-	}
-        if ( (register_chrdev_region( &dev , _MINOR_ , "buffer0" ) ) < 0 )  { 
-		printk(KERN_INFO "Cannot allocate major number region\n");
-		return -ENOMEM;
+        if ( ( alloc_chrdev_region ( & dev , 0 , 1 , "BUF" ) ) < 0 )  { 
+		printk(KERN_INFO "Cannot allocate major number\n");
+		return -EINVAL;
 	}
 
-		if ((cdev_class = class_create ( THIS_MODULE , __tmp_name__))==NULL) {
+		cdev_data.owner = THIS_MODULE;
+		cdev_init( &cdev_data , &fops);
+
+		if (cdev_add(&cdev_data, dev, 1 )<0) {
+				printk ("Cannot add the device to the system\n");
+                		cdev_del ( &cdev_data ) ;
+				return -EINVAL;
+		}
+
+		if ((cdev_class = class_create ( THIS_MODULE , DEVCLASS))==NULL) {
 			printk (KERN_INFO "Cannot add struct class\n");
+                		cdev_del ( &cdev_data ) ;
 				class_unregister(cdev_class);
         			class_destroy 	( cdev_class ) ;
-				return -ENOMEM;
+				return -EINVAL;
 		}
 
 
 
-        if ( ( device_create ( cdev_class , NULL , dev , NULL , __tmp_name__  ) ) == NULL ) {
+        if ( ( device_create ( cdev_class , NULL , dev , NULL , "buffer0" ) ) == NULL ) {
                 printk ( "ERROR : CANNOT CREATE THE DEVICE \n" );
 		device_destroy ( cdev_class , dev ) ; 
+               	cdev_del ( &cdev_data ) ;
 		class_unregister(cdev_class);
         	class_destroy 	( cdev_class ) ;
-                return -EINVAL ;
+                return EEXIST ;
         }
 		
 	printk ("Buffered Device Initialized; Please check /dev");
-	kfree(__tmp_name__);
 	return 0;
 }
 void __exit clean_device(void) {
 	device_destroy(cdev_class,dev);
+        cdev_del ( &cdev_data ) ;
 	class_unregister(cdev_class);
 	class_destroy (cdev_class);
-	unregister_chrdev_region( dev , _MINOR_);
-	kfree(lst);
+	unregister_chrdev_region( dev , MINORS);
 }
 
 int device_open (struct inode *inode , struct file *file ) {
@@ -120,9 +128,16 @@ ssize_t device_write (struct file * file,
 	if (is_busy)
 		return -EBUSY;
 	is_busy=1;
+	
 	while ( len && *buf ) {
-		enqueue ( lst , (bdat_t *)buf++ ) ;
-		len --;
+
+		if (enqueue ( lst , (void *)buf++ )){
+			printk(KERN_INFO "Internal error if this buffered device");
+			repair_size(lst);
+			continue;
+		}
+
+		len --; 
 	}
 	is_busy=0;
 	return ret;
