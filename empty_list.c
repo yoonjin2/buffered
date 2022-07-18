@@ -1,4 +1,4 @@
-#include "list.h"
+#include "include/list.h"
 #include <linux/slab.h>
 // function that empties list
 void empty_list ( list * lst ) {
@@ -7,8 +7,8 @@ void empty_list ( list * lst ) {
 				return;
 		}
     while ( element != lst -> rear ) { // while list is not rear node
-        element = element -> next ;   // go to the next node
         kfree ( element ) ;           // free the list
+        element = element -> next ;   // go to the next node
     }
 	lst -> front -> next = lst -> rear ;
 	lst -> rear -> prev = lst -> front ;

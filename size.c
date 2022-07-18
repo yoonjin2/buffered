@@ -1,4 +1,4 @@
-#include "list.h"
+#include "include/list.h"
 
 // return size of list
 ll size ( list * lst ) {

@@ -1,4 +1,4 @@
-#include "list.h"
+#include "include/list.h"
 #include <linux/string.h>
 // find node
 node * find ( list * lst, void * key ) {

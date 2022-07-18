@@ -1,4 +1,4 @@
-#include "list.h"
+#include "include/list.h"
 #include <linux/init.h>
 #include <linux/slab.h>
 #include <linux/module.h>
@@ -31,6 +31,10 @@ struct class *cdev_class;
 typedef struct cdev cdev;
 cdev cdev_data;
 dev_t dev;
+
+MODULE_AUTHOR("CraftX Inc.");
+MODULE_LICENSE("GPL");
+
 int __init init_device (void) {
 	
         dev = MKDEV ( MAJOR ( dev ) , MINOR ( dev ) ) ;
@@ -39,8 +43,16 @@ int __init init_device (void) {
 		printk(KERN_INFO "Cannot allocate major number\n");
 		return -EINVAL;
 	}
-		cdev_init( &cdev_data , &fops);
+
 		cdev_data.owner = THIS_MODULE;
+		cdev_init( &cdev_data , &fops);
+
+		if (cdev_add(&cdev_data, dev, 1 )<0) {
+				printk ("Cannot add the device to the system\n");
+                		cdev_del ( &cdev_data ) ;
+				return -EINVAL;
+		}
+
 		if ((cdev_class = class_create ( THIS_MODULE , DEVCLASS))==NULL) {
 			printk (KERN_INFO "Cannot add struct class\n");
                 		cdev_del ( &cdev_data ) ;
@@ -50,13 +62,6 @@ int __init init_device (void) {
 		}
 
 
-		if (cdev_add(&cdev_data, dev, 1 )<0) {
-				printk ("Cannot add the device to the system\n");
-                		cdev_del ( &cdev_data ) ;
-				class_unregister(cdev_class);
-        			class_destroy 	( cdev_class ) ;
-				return -EINVAL;
-		}
 
         if ( ( device_create ( cdev_class , NULL , dev , NULL , "buffer0" ) ) == NULL ) {
                 printk ( "ERROR : CANNOT CREATE THE DEVICE \n" );
@@ -127,7 +132,4 @@ ssize_t device_write (struct file * file,
 }
 module_init(init_device);
 module_exit(clean_device);
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Yunjin Lee");
-MODULE_VERSION("1.00");
 

@@ -1,4 +1,4 @@
-#include "list.h"
+#include "include/list.h"
 //show list
 void show( list *lst ) {
     node * t;

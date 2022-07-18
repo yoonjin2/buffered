@@ -1,4 +1,4 @@
-#include "list.h"
+#include "include/list.h"
 #include <linux/slab.h>
 void init_list ( list * lst ) { // init list
   lst -> front = ( node * ) kmalloc ( sizeof ( node ) , GFP_KERNEL ) ;
