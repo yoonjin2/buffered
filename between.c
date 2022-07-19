@@ -2,7 +2,7 @@
 #include <linux/string.h>
 #include <linux/slab.h>
 // add number between two nodes
-int8_t between( list * lst , bdat_t * item , node * b , node * n ) {
+int8_t between( list * lst , tsData item , node * b , node * n ) {
     node * element ;
     if ( ( element = ( node * ) kmalloc ( sizeof ( node ) , SLAB_TEMPORARY ) ) == NULL ) {
         return 1 ;
@@ -21,7 +21,7 @@ int8_t between( list * lst , bdat_t * item , node * b , node * n ) {
     }
     return 0;
 }
-int8_t enqueue ( list * lst , bdat_t * item ) {
+int8_t enqueue ( list * lst , tsData item ) {
 	return between ( lst , item , lst -> rear -> prev , lst -> rear ) ;
 } // alias for enquque
 void enqueue_list ( list * lst , list * lst_target ) {

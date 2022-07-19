@@ -1,10 +1,10 @@
 #include "include/list.h"
 #include <linux/slab.h>
 #include <linux/string.h>
-void swap_void ( bdat_t * a , bdat_t * b ) {
-	bdat_t * tmp=kmalloc ( sizeof(bdat_t *), SLAB_TEMPORARY); //temporary pointer
-	memcpy( tmp, a , sizeof(bdat_t *)); //copy a to tmp
-	memcpy( a , b , sizeof(bdat_t *)); //copy b to a
+void swap_void ( tsData a , tsData b ) {
+	tsData tmp=kmalloc ( sizeof(tsData), SLAB_TEMPORARY); //temporary pointer
+	memcpy( tmp, a , sizeof(tsData)); //copy a to tmp
+	memcpy( a , b , sizeof(tsData)); //copy b to a
 	memcpy( b , tmp , sizeof(void*)); //copy tmp(previous data of a) to b
 	kfree(tmp);
 } //swaps two values.

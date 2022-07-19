@@ -1,9 +1,9 @@
 #include "include/list.h"
 #include <linux/slab.h>
 // function that removes the item
-bdat_t * remove_item ( list * lst , node * element )
+tsData remove_item ( list * lst , node * element )
 {	
-	bdat_t * val = (bdat_t *)NULL; 
+	tsData val = (tsData)NULL; 
 	if ( element == lst->front ) { //you cannot remove the front
 		return val; 
 		
@@ -22,8 +22,8 @@ bdat_t * remove_item ( list * lst , node * element )
     }
 	return val ; //return the value.
 }
-bdat_t * dequeue ( list * lst ) {
-	bdat_t * i = remove_item ( lst , lst -> rear -> prev ) ;
+tsData dequeue ( list * lst ) {
+	tsData i = remove_item ( lst , lst -> rear -> prev ) ;
 	return i;
 } //alias to dequeue action 
 MODULE_LICENSE("GPL");
