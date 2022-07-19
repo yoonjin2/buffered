@@ -3,7 +3,10 @@
 // function that removes the item
 tsData remove_item ( list * lst , node * element )
 {	
-	tsData val = (tsData)NULL; 
+	tsData val;
+	val.data=NULL;
+	val.ts.tv_sec=0;
+	val.ts.tv_nsec=0;
 	if ( element == lst->front ) { //you cannot remove the front
 		return val; 
 		

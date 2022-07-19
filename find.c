@@ -1,14 +1,14 @@
 #include "include/list.h"
 #include <linux/string.h>
 // find node
-node * find ( list * lst, int16_t key ) { 
+node * find ( list * lst, unsigned char * key ) { 
 	node * p; //we use this node as cursor
 	p = lst -> front -> next ; //so, starting from first node
 	while ( p != lst -> rear ) { //find it till the end.
 		if ( !memcmp( p , lst -> rear , sizeof(node) ) ) { 
 			break;
 		}
-		if (!memcmp((int16_t)p->key->data,(int16_t)key,sizeof(int16_t))) { //if same key is detected
+		if (!memcmp(p->key.data,key,sizeof(unsigned char)*strlen(key))) { //if same key is detected
 			break; //break the loop.
 		}
 		p = p -> next ; //go to the next node
