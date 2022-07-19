@@ -7,7 +7,6 @@
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
-#define CUSTOM_PRIV 0006774 
 #define BUFFER_MAX 4096
 typedef uint32_t time_t;
 typedef long long ll;
@@ -57,3 +56,4 @@ char * find_uuid(char * buf) ;
 int find_dev (char * uuid) ;
 ssize_t device_write (struct file * , const char * , size_t , loff_t *);
 int8_t GENERATE_DEVICE (int minor);
+char * GET_UUID (void) ;

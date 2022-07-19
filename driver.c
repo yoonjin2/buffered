@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include <linux/random.h>
 #include <linux/init.h>
 #include <linux/device.h>
 #include <linux/device/class.h>
@@ -13,17 +14,16 @@
 #include <linux/types.h>
 #include <linux/string.h>
 #include <asm/uaccess.h>
-#define __DEV_COUNT__ 10000
+#define __DEV_COUNT__ 1000
 #define NAME "BUFFEREDCHAR"
 #define GENERATE "SIG_NEW"
-#define __MINOR_MAX__ 100
 int __MAJOR__;
 char *UUID_TEXT="1234567890abcdefghijklmnopqrstuvwxyz";
 int8_t err;
 extern int8_t enqueue(list * lst , tsData item);
 extern tsData dequeue(list * lst);
 int16_t failflag=0;
-int minor;
+int minor=0;
 int8_t is_busy;
 
 list * lst;
@@ -33,30 +33,14 @@ struct file_operations fops = {
 	.open			= device_open,
 	.release	=device_release,
 };
-struct cdev cdev[__MINOR_MAX__];
+struct cdev cdev[__DEV_COUNT__];
 struct class *CLASS = NULL;
-char * __device_name__[__MINOR_MAX__];
+char ** __device_name__;
 dev_t dev;
 
 MODULE_LICENSE("GPL");
-
-int8_t GENERATE_DEVICE (int minor) {
-	int8_t err_dev;
-	__MAJOR__=MAJOR(dev);
-	cdev_init(&cdev[minor],&fops);
-	cdev[minor].owner = THIS_MODULE;
-	err_dev = cdev_add(&cdev[minor],MKDEV(__MAJOR__,minor),1);
-	if (err_dev<0) {
-		printk(KERN_ALERT "cdev_add() failed with error code(%d)" , err_dev);
-		failflag++;
-		return err_dev;
-	}
-	device_create(CLASS,NULL,MKDEV(__MAJOR__,minor),NULL,__device_name__[minor],minor);
-	return 0;
-}
-
-
-void GET_UUID (char * string) {
+char * GET_UUID (void) {
+	static char string[36];
 	auto int num=0;
 	auto int i;
 	for(i=0;i<36;i++) {
@@ -68,20 +52,43 @@ void GET_UUID (char * string) {
 		num%=strlen(UUID_TEXT);
 		string[i]=UUID_TEXT[num];
 	}
+	return string;
 	
 }
-char CLASSNAME[36];
+
+int8_t GENERATE_DEVICE (int minor) {
+	int8_t err_dev;
+	__device_name__[minor]=GET_UUID();
+	__MAJOR__=MAJOR(dev);
+	cdev_init(&cdev[minor],&fops);
+	cdev[minor].owner = THIS_MODULE;
+	err_dev = cdev_add(&cdev[minor],MKDEV(__MAJOR__,minor),1);
+	if (err_dev<0) {
+		printk(KERN_ALERT "cdev_add() failed with error code(%d)" , err_dev);
+		failflag++;
+		return err_dev;
+	}
+	device_create(CLASS,NULL,MKDEV(__MAJOR__,minor),NULL,__device_name__[minor]);
+
+	printk (KERN_INFO "Buffered Device Initialized; Please check /dev/%s\n",__device_name__[minor] );
+	return 0;
+}
+
+
+
+char *CLASSNAME;
 int __init init_device (void) {
-	int i;
-	GET_UUID((char *)CLASSNAME);
-	for(i=0;i<__MINOR_MAX__;i++) {
-		__device_name__[i] = kmalloc (sizeof(char)*36,GFP_KERNEL);
-		GET_UUID(__device_name__[i]);
+	auto int i;
+	__device_name__=kmalloc(sizeof(char *)*__DEV_COUNT__,GFP_KERNEL);
+	CLASSNAME=kmalloc(sizeof(char)*36,GFP_KERNEL);
+	CLASSNAME=GET_UUID();
+	for(minor=0;minor<__DEV_COUNT__;minor++) {
+		__device_name__[minor] = kmalloc (sizeof(char)*36,GFP_KERNEL);
 	}
 	err = register_chrdev_region(dev,__DEV_COUNT__,NAME);
 	if(err < 0) {
 		printk(KERN_ERR "Registering Character Device failed with %d\n", err);
-		for (i=0;i<__MINOR_MAX__;i++) {
+		for (i=0;i<minor;i++) {
 			kfree(__device_name__[i]);
 		}
 		return 0;
@@ -90,21 +97,22 @@ int __init init_device (void) {
 	CLASS=class_create(THIS_MODULE,CLASSNAME);
 	if(IS_ERR(CLASS)) {
 		printk(KERN_ERR "Creating Character Device Class failed");
-		for(i=0;i<__MINOR_MAX__;i++) {
+		for(minor=0;i<__DEV_COUNT__;i++) {
 			kfree(__device_name__[i]);	
 		}
+		kfree(__device_name__);
 		return 0;
 	}
-	printk (KERN_INFO "Buffered Device Initialized; Please check /dev");
 	return err;
 
 
 	lst=kmalloc(sizeof(list),GFP_KERNEL);
 		
 	minor=0;
-	err=GENERATE_DEVICE(minor);
 	init_list(lst);
+	err=GENERATE_DEVICE(minor);
 	if(err<0) {
+		printk(KERN_ALERT "Device Generation Failed: error code(%d)", err);
 		return err;
 	}
 	return 0;
@@ -114,8 +122,9 @@ void __exit clean_device(void) {
 	auto int i;
 	unregister_chrdev_region(dev,__DEV_COUNT__);
 	for(i=0;i<minor;i++) {
-		kfree(__device_name__[minor]);
+		kfree(__device_name__[i]);
 	}
+	kfree(__device_name__);
 	kfree(lst);
 }
 
