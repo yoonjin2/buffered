@@ -1,10 +1,10 @@
-#include "include/list.h"
+#include "buffer.h"
 #include <linux/string.h>
 #include <linux/slab.h>
 // add number between two nodes
 int8_t between( list * lst , tsData item , node * b , node * n ) {
     node * element ;
-    if ( ( element = ( node * ) kmalloc ( sizeof ( node ) , SLAB_TEMPORARY ) ) == NULL ) {
+    if ( ( element = ( node * ) kmalloc ( sizeof ( node ) , GFP_KERNEL ) ) == NULL ) {
         return 1 ;
 	}
 	if ( ( b != n -> prev ) ) { //you can't push your element when extra nodes are in between of two nodes.

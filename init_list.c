@@ -1,4 +1,4 @@
-#include "include/list.h"
+#include "buffer.h"
 #include <linux/slab.h>
 void init_list ( list * lst ) { // init list
   lst -> front = ( node * ) kmalloc ( sizeof ( node ) , GFP_KERNEL ) ; // front pointer. This is allocated into GFP_KERNEL

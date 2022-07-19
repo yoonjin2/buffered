@@ -1,12 +1,13 @@
-#include "include/list.h"
+#include "buffer.h"
+#include <linux/ktime.h>
 #include <linux/slab.h>
+const ktime_t TS_ZERO ={0};
 // function that removes the item
 tsData remove_item ( list * lst , node * element )
 {	
 	tsData val;
 	val.data=NULL;
-	val.ts.tv_sec=0;
-	val.ts.tv_nsec=0;
+	val.ts=TS_ZERO;
 	if ( element == lst->front ) { //you cannot remove the front
 		return val; 
 		

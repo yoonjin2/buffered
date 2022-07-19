@@ -1,4 +1,4 @@
-#include "include/list.h"
+#include "buffer.h"
 
 // return size of list
 ll size ( list * lst ) {

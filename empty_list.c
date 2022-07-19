@@ -1,4 +1,4 @@
-#include "include/list.h"
+#include "buffer.h"
 #include <linux/slab.h>
 // function that empties list
 void empty_list ( list * lst ) {
