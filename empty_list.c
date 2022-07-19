@@ -20,3 +20,5 @@ void free_list (list * lst) { // freeing the list
     kfree ( lst -> rear ) ; // free the list -> rear
 }
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");

@@ -2,29 +2,28 @@
 #include <linux/string.h>
 #include <linux/slab.h>
 // add number between two nodes
-int8_t between( list * lst , bdat_t * item , node * b , node * n ) {
+void between( list * lst , void * item , node * b , node * n ) {
     node * element ;
-    if ( ( element = ( node * ) kmalloc ( sizeof ( node ) , SLAB_TEMPORARY ) ) == NULL ) {
-        return 1 ;
+    if ( ( element = ( node * ) kmalloc ( sizeof ( node ) , GFP_KERNEL ) ) == NULL ) {
+        return ;
 	}
-	if ( ( b != n -> prev ) ) { //you can't push your element when extra nodes are in between of two nodes.
-		kfree( element ); //So, I will free allocated node...
-		return -1;
+	if ( ( b != n -> prev ) ) {
+		kfree( element );
+		return ;
 	}
     else {
-        element -> key = item ; //this is your key.
-        b -> next = element ; //node b's next node is your newly added node
-        element -> prev = b;  //so new node's previous node is b
-        element -> next = n ; // new node's next node is node n;
-	n -> prev = element ; // node n's previous node is new node.
-    	lst -> size ++ ;      // new_size=old_size+1
+        element -> key = item ;
+        b -> next = element ;
+        element -> prev = b;
+        element -> next = n ;
+	n -> prev = element ;
+    	lst -> size ++ ;
     }
-    return 0;
 }
-int8_t enqueue ( list * lst , bdat_t * item ) {
-	return between ( lst , item , lst -> rear -> prev , lst -> rear ) ;
-} // alias for enquque
-void enqueue_list ( list * lst , list * lst_target ) {
+void push ( list * lst , void * item ) {
+	between ( lst , item , lst -> rear -> prev , lst -> rear ) ;
+}
+void push_list ( list * lst , list * lst_target ) {
   list * target = kmalloc ( (size(lst_target)+2)*sizeof (node) * sizeof(ll) , GFP_KERNEL );
 	node * push_node;
 	node * target_node;
@@ -39,5 +38,7 @@ void enqueue_list ( list * lst , list * lst_target ) {
 	reset_list ( target );
 	free_list  ( target );
 
-} // enqueue whole queue
+}
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Yunjin Lee");
+MODULE_VERSION("0.01");
