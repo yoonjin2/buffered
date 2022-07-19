@@ -6,10 +6,19 @@
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <asm/uaccess.h>
+
+#define BUFFER_MAX 10000
+
 typedef long long ll;
 
+typedef struct bdat_t {
+	int16_t _uuid;
+	int32_t data;
+} bdat_t;
+
+
 typedef struct node {
-	void * key;
+	bdat_t * key;
 	struct node * prev;
 	struct node * next;
 } node;
@@ -19,15 +28,14 @@ typedef struct list {
 	node *rear;
 	ll size; 
 } list;
-
 void init_list ( list * lst );
 void reset_list ( list * lst );
-void between  ( list * lst , void * item , node * r , node * element ) ;
-void push ( list * lst , void * item ) ;
-void push_list ( list * lst , list * lst_target ) ;
+int8_t between  ( list * lst , bdat_t * item , node * r , node * element ) ;
+int8_t enqueue ( list * lst , bdat_t * item ) ;
+void enqueue_list ( list * lst , list * lst_target ) ;
 
-void * remove_item ( list * lst , node * element ) ;
-void * pop_item ( list * lst ) ;
+bdat_t * remove_item ( list * lst , node * element ) ;
+bdat_t * dequeue ( list * lst ) ;
 ll size ( list *lst ) ;
 
 void repair_size ( list *lst ) ;
@@ -35,11 +43,11 @@ _Bool empty ( list * lst ) ;
 void show ( list * lst ) ;
 void free_list ( list * lst ) ;
 void empty_list ( list * lst ) ;
-node * find ( list * lst , void * key ) ;
+node * find ( list * lst , bdat_t * key ) ;
 node * index_node ( list * lst , ll i ) ;
 
 void beautify(list *lst) ;
-void swap_void ( void * a, void * b ); 
+void swap_void ( bdat_t * a, bdat_t * b ); 
 
 int __init init_device (void);
 void __exit clean_device(void);

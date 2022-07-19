@@ -2,10 +2,8 @@
 //show list
 void show( list *lst ) {
     node * t;
-    for ( t = lst -> front -> next ; t != lst -> rear ; t = t -> next ) {
-			printk ( "%c" , *(char *)t->key );
+    for ( t = lst -> front -> next ; t != lst -> rear ; t = t -> next ) { //show all nodes' key 
+			printk ( "%c" , *(char *)t->key ); //no other data;just the key
     }
 }
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Yunjin Lee");
-MODULE_VERSION("0.01");

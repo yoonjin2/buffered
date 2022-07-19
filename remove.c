@@ -1,31 +1,29 @@
 #include "include/list.h"
 #include <linux/slab.h>
 // function that removes the item
-void * remove_item ( list * lst , node * element )
+bdat_t * remove_item ( list * lst , node * element )
 {	
-	void * val = (void *)NULL;
-	if ( element == lst->front ) {
-		return val;
+	bdat_t * val = (bdat_t *)NULL; 
+	if ( element == lst->front ) { //you cannot remove the front
+		return val; 
 		
-	}	else if ( element == lst->rear ) {
+	}	else if ( element == lst->rear ) { //you cannot remove the rear, too
 		return val;
-  } else if ( lst -> size == 0 ) {
+  } else if ( lst -> size == 0 ) { //nothing is here. nothing.
 	  return val;
   } else {
-		node * x = element -> next;
-		node * y = element -> prev;
-        x -> prev = y;
-		y -> next = x; 
-		val = element -> key ;
-    kfree ( element ) ;
-    lst -> size -- ;
+		node * n = element -> next; //element's next node is n.
+		node * p = element -> prev; //element's previous node is p.
+        	n -> prev = p; //skip the element, re-connect previous node as p
+		p -> next = n; //skip the element, re-connect next node as n;
+		val = element -> key ; //element->key will be the return value.
+    kfree ( element ) ;  //successfully deleted
+    lst -> size -- ;     //new_size=old_size-1
     }
-	return val ;
+	return val ; //return the value.
 }
-void * pop_item ( list * lst ) {
-	void * i = remove_item ( lst , lst -> rear -> prev ) ;
+bdat_t * dequeue ( list * lst ) {
+	bdat_t * i = remove_item ( lst , lst -> rear -> prev ) ;
 	return i;
-}
+} //alias to dequeue action 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Yunjin Lee");
-MODULE_VERSION("0.01");
